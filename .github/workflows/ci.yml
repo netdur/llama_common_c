@@ -20,7 +20,7 @@ jobs:
     - name: Set up Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '12.4'
+        xcode-version: '14.2.0'
 
     - name: Clone llama.cpp repository
       run: git clone https://github.com/ggerganov/llama.cpp
