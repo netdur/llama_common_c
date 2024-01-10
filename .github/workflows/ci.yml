@@ -1,0 +1,57 @@
+name: CI Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build on macOS
+    runs-on: macos-latest
+    env:
+      DEV_TEAM: ${{ secrets.DEV_TEAM }} 
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: '12.4'
+
+    - name: Clone llama.cpp repository
+      run: git clone https://github.com/ggerganov/llama.cpp
+
+    - name: Get llama.cpp latest tag
+      id: llama_tag
+      run: echo "::set-output name=tag::$(cd llama.cpp && git describe --tags `git rev-list --tags --max-count=1`)"
+
+    - name: Run build script
+      run: ./build.sh llama.cpp $DEV_TEAM
+
+    - name: Archive install directory
+      run: tar -czvf llm-binaries.tar.gz install
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.llama_tag.outputs.tag }}
+        release_name: Release ${{ steps.llama_tag.outputs.tag }}
+        draft: false
+        prerelease: false
+
+    - name: Upload binaries to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./llm-binaries.tar.gz
+        asset_name: llm-binaries.tar.gz
+        asset_content_type: application/gzip
