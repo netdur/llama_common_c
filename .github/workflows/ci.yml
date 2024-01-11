@@ -29,6 +29,9 @@ jobs:
       id: llama_tag
       run: echo "::set-output name=tag::$(cd llama.cpp && git describe --tags `git rev-list --tags --max-count=1`)"
 
+    - name: Make build script executable
+      run: chmod +x ./run_build.sh
+    
     - name: Run build script
       run: ./run_build.sh llama.cpp $DEV_TEAM
 
