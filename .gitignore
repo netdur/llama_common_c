@@ -38,3 +38,4 @@ include
 install
 lib
 *.log
+.cache

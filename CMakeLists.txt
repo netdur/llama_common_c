@@ -73,4 +73,4 @@ else()
 endif()
 
 install (TARGETS llm_lib DESTINATION ${CMAKE_CURRENT_LIST_DIR}/install/${PLATFORM}/lib)
-install (FILES src/llm.h DESTINATION ${CMAKE_CURRENT_LIST_DIR}/install/${PLATFORM}/include)
+install (FILES src/llm.h include/llama.h DESTINATION ${CMAKE_CURRENT_LIST_DIR}/install/${PLATFORM}/include)
