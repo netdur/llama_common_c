@@ -96,7 +96,7 @@ build_llm_library() {
 
   cmake --build . --config Release --target install
 
-  cp "assets" "${build_dir]/assets"
+  cp "assets" "${build_dir}/assets"
 
   # rm -rf "${build_dir}"
   cd ..
