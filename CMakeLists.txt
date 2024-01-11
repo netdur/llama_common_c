@@ -5,7 +5,13 @@ add_definitions(-DLLAMA_DISABLE_LOGGING)
 # Optional Development Team attribute
 set(DEV_TEAM "" CACHE STRING "Xcode Development Team ID")
 if(DEV_TEAM)
-  set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM ${DEV_TEAM} CACHE INTERNAL "")
+  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Development")
+  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED YES)
+  set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM ${DEV_TEAM})
+else()
+  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Development")
+  set(CMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED YES)
+  set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "")
 endif()
 
 project(llm)
@@ -29,6 +35,7 @@ find_package(Threads REQUIRED)
 
 find_library(LLAMA_LIBRARY NAMES llama PATHS ${LIB_DIR} NO_DEFAULT_PATH)
 find_library(COMMON_LIBRARY NAMES common PATHS ${LIB_DIR} NO_DEFAULT_PATH)
+find_library(GGML_LIBRARY NAMES ggml PATHS ${LIB_DIR} NO_DEFAULT_PATH)
 
 # Option to build the executable
 option(BUILD_EXECUTABLE "Build the executable" OFF)
@@ -56,6 +63,9 @@ if(APPLE)
   add_compile_definitions(GGML_USE_METAL)
   target_link_libraries(llm_lib PRIVATE ${FOUNDATION_LIBRARY} ${METAL_FRAMEWORK} ${METALKIT_FRAMEWORK} ${ACCELERATE_LIBRARY})
 
+  if(BUILD_EXECUTABLE)
+    target_link_libraries(llm_exec PRIVATE ${FOUNDATION_LIBRARY} ${METAL_FRAMEWORK} ${METALKIT_FRAMEWORK} ${ACCELERATE_LIBRARY})
+  endif()
 else()
   find_package(CUDAToolkit)
   

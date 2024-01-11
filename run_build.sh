@@ -3,7 +3,7 @@ original_pwd=$(pwd)
 llama_cpp_path="$1"
 dev_team="$2"
 
-if [ -z "$llama_cpp_path" ] || [ -z "$dev_team" ]; then
+if [ -z "$llama_cpp_path" ]; then
     echo "Usage: $0 [llama_cpp_path] [dev_team]"
     exit 1
 fi
@@ -30,12 +30,15 @@ build_for_platform() {
   if [ "$platform" == "MAC_ARM64" ]; then
     cp "common/Release/libcommon.a" "${output_dir}/libcommon.a"
     cp "Release/libllama.a" "${output_dir}/libllama.a"
+    cp "build/ggml.build/Release/libggml.a" "${output_dir}/libggml.a"
   elif [ "$platform" == "OS64" ]; then
     cp "common/Release-iphoneos/libcommon.a" "${output_dir}/libcommon.a"
     cp "Release-iphoneos/libllama.a" "${output_dir}/libllama.a"
+    cp "build/ggml.build/Release-iphoneos/libggml.a" "${output_dir}/libggml.a"
   elif [ "$platform" == "SIMULATORARM64" ]; then
     cp "common/Release-iphonesimulator/libcommon.a" "${output_dir}/libcommon.a"
     cp "Release-iphonesimulator/libllama.a" "${output_dir}/libllama.a"
+    cp "build/ggml.build/Release-iphonesimulator/libggml.a" "${output_dir}/libggml.a"
   fi
 
   cd ..
@@ -80,10 +83,9 @@ build_llm_library() {
   mkdir "$build_dir"
   cd "$build_dir"
 
-  if [ "$platform" == "OS64" ]; then
-    build_executable_flag="-DBUILD_EXECUTABLE=OFF"
-  else
-    build_executable_flag=""
+  build_executable_flag=""
+  if [ "$platform" == "MAC_ARM64" ] && [ -n "$dev_team" ]; then
+    build_executable_flag="-DBUILD_EXECUTABLE=ON -DCMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM=${dev_team}"
   fi
 
   cmake .. -DCMAKE_BUILD_TYPE=Release -G Xcode \
@@ -94,7 +96,7 @@ build_llm_library() {
 
   cmake --build . --config Release --target install
 
-  rm -rf "${build_dir}"
+  # rm -rf "${build_dir}"
   cd ..
 }
 
